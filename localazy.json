@@ -1,0 +1,20 @@
+{
+
+  "writeKey": "a7681701462757827957-bee1c1991950f25f107184586027c9ec6ccbdd437c43b39b183376c0aebd5a0b",
+  "readKey": "a7681701462757827957-e180ddf6d4bb2addc9466f977d9ec3f786b232ae9677bd156bf2ff9823284ac6",
+
+  "upload": {
+    "type": "json",
+    "files": {
+      "pattern": "assets/lang/*/file.json",
+      "lang": "${autodetectLang}",
+      "file": "file.json"
+    }
+  },
+  "download": {
+    "includeSourceLang": true,
+    "files": "assets/lang/${lang}/${file}"
+  },
+  "transformations": []
+
+}

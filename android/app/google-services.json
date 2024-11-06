@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "936038387782",
+    "project_id": "mamak-565f3",
+    "storage_bucket": "mamak-565f3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936038387782:android:f5282ad3ad6410d6857a47",
+        "android_client_info": {
+          "package_name": "ir.mamakschool.mamak"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936038387782-nludvq6077p762ni7p183528t3ndb0t0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB--iJqrSD3UaLUaDkswDAUd5TqHpzXryw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936038387782-nludvq6077p762ni7p183528t3ndb0t0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
