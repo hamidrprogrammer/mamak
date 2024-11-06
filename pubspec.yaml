@@ -82,6 +82,7 @@ dependencies:
   table_calendar_jalali: 1.0.1
   loading_animation_widget: ^1.3.0
   recaptcha_enterprise_flutter: ^18.6.1
+  jalali_table_calendar_plus: ^1.1.1
 
 dependency_overrides:
   win32: ^5.5.4

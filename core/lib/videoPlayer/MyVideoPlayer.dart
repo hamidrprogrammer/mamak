@@ -26,26 +26,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   }
 
   void init() async {
-    videoPlayerController = widget.data.startsWith('http')
-        ? VideoPlayerController.network(widget.data)
-        : kIsWeb
-            ? VideoPlayerController.network(
-                await getVideoFromContent(widget.data))
-            : VideoPlayerController.file(
-                File(await getVideoFromContent(widget.data)))
-      ..initialize().then(
-        (_) => setState(
-          () {
-            if (videoPlayerController?.value.isInitialized == true) {
-              videoPlayerController?.seekTo(const Duration(seconds: 3));
-            }
-          },
-        ),
-      );
-    videoPlayerController?.setLooping(true);
-    videoPlayerController?.addListener(() {
-      setState(() {});
-    });
+
   }
 
   @override

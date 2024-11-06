@@ -9,8 +9,8 @@ class HomeIntroViewModel extends BaseViewModel {
   }
 
   Future<String> getPath(String content) async {
-    var path = await ShareFile.saveVideoFile(base64Decode(content));
-    Logger.d('path is $path');
-    return path;
+    // var path = await ShareFile.saveVideoFile(base64Decode(content));
+    // Logger.d('path is $path');
+    return '';
   }
 }
