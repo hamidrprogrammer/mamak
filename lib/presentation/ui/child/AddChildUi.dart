@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mamak/core/form/validator/LastNameValidator.dart';
@@ -31,7 +32,7 @@ class AddChildUi extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned.fill(
-                  top: 15,
+                  top: kIsWeb ? 0 : 15,
                   child: Image.asset(
                     'assets/Rectangle21.png',
                     fit: BoxFit.fitWidth,

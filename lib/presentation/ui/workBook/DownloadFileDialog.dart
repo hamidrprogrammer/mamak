@@ -6,9 +6,10 @@ import 'package:mamak/presentation/ui/main/MyLoader.dart';
 import 'package:mamak/presentation/ui/main/UiExtension.dart';
 import 'package:mamak/presentation/viewModel/file/DownloadFileViewModel.dart';
 
+import 'AccordionDemo.dart';
+
 class DownloadFileDialog extends StatefulWidget {
-  const DownloadFileDialog({Key? key, required this.fileDataId})
-      : super(key: key);
+  const DownloadFileDialog({Key? key, required this.fileDataId}) : super(key: key);
   final String fileDataId;
 
   @override
@@ -17,6 +18,7 @@ class DownloadFileDialog extends StatefulWidget {
 
 class _DownloadFileDialogState extends State<DownloadFileDialog> {
   late DownloadFileViewModel viewModel;
+
 
   @override
   void initState() {
@@ -27,10 +29,11 @@ class _DownloadFileDialogState extends State<DownloadFileDialog> {
 
   @override
   Widget build(BuildContext context) {
-    // Generate sample items
+   // Generate sample items
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0)),
       insetPadding: 16.dpe,
       alignment: Alignment.center,
       child: CubitProvider(
@@ -55,4 +58,6 @@ class _DownloadFileDialogState extends State<DownloadFileDialog> {
       ),
     );
   }
+
+
 }

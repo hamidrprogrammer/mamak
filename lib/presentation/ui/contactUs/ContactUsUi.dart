@@ -12,6 +12,8 @@ import 'package:mamak/presentation/ui/main/UiExtension.dart';
 import 'package:mamak/presentation/viewModel/app/ContactUsViewModel.dart';
 import 'package:mamak/presentation/viewModel/baseViewModel.dart';
 
+import 'MamakMap.dart';
+
 class ContactUsUi extends StatelessWidget {
   const ContactUsUi({Key? key}) : super(key: key);
 

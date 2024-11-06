@@ -28,7 +28,7 @@ class SetUserAvatarUseCase extends BaseUseCase {
       }
     } catch (e) {
       Logger.e(e);
-      // flow.throwCatch();
+      flow.throwCatch(e);
     }
   }
 }

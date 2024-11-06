@@ -1,6 +1,8 @@
 import 'package:mamak/config/apiRoute/user/UserUrls.dart';
 import 'package:mamak/useCase/BaseUseCase.dart';
 
+import '../../data/body/user/information/InformationBodey.dart';
+
 class InformationUseCase extends BaseUseCase {
   Future<Map<String, dynamic>> getData() async {
     var uri = createUri(path: UserUrls.getInformation);

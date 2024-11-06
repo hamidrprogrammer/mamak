@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mamak/config/uiCommon/WidgetSize.dart';
@@ -13,54 +14,125 @@ import 'package:mamak/presentation/viewModel/user/RecoveryPasswordViewModel.dart
 
 class RecoveryPasswordUi extends StatelessWidget {
   const RecoveryPasswordUi({Key? key}) : super(key: key);
+  Widget buildInputField(
+      {required String label,
+      required String hint,
+      required Function(String) onChangeValue}) {
+    final TextStyle inputLabelStyle = TextStyle(
+      fontFamily: 'IRANSansXFaNum',
+      fontWeight: FontWeight.w400,
+      fontSize: 14,
+      height: 1.7,
+      color: Color(0xFF353842),
+    );
+    final TextStyle inputHintStyle = TextStyle(
+      fontFamily: 'IRANSansXFaNum',
+      fontWeight: FontWeight.w400,
+      fontSize: 14,
+      height: 1.7,
+      color: Color(0xFF505463),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: inputLabelStyle,
+        ),
+        SizedBox(height: 6),
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: BoxDecoration(
+            color: Color(0xFFF6F6F8),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: TextField(
+            onChanged: onChangeValue,
+            textDirection: TextDirection.rtl,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: hint,
+              hintStyle: inputHintStyle,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return CubitProvider(
       create: (context) => RecoveryPasswordViewModel(AppState.idle),
       builder: (bloc, state) {
-        return Padding(
-          padding: const EdgeInsets.all(WidgetSize.pagePaddingSize),
-          child: Form(
-            key: bloc.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                20.dpv,
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [MamakLogo(width: 150)],
-                ),
-                20.dpv,
-                Text(
-                  'change_password'.tr,
-                  style: context.textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                20.dpv,
-                FormTitleWithStar(
-                  title: "new_password".tr,
-                ),
-                4.dpv,
-                PasswordFieldHelper(onChangeValue: bloc.onPasswordChange),
-                10.dpv,
-                FormTitleWithStar(
-                  title: "confirm_new_pas".tr,
-                ),
-                4.dpv,
-                PasswordFieldHelper(
-                    onChangeValue: bloc.onConfirmPasswordChange),
-                20.dpv,
-                ElevatedButton(
-                    onPressed: bloc.onSubmitClick,
-                    child: bloc.state.isLoading
-                        ? const MyLoader(color: Colors.black)
-                        : Text('submit'.tr))
-              ],
+        return Scaffold(
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(kToolbarHeight),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    top: kIsWeb ? 0 : 15,
+                    child: Image.asset(
+                      'assets/Rectangle21.png', // Path to your SVG file
+                      fit: BoxFit.fitWidth,
+                      // To cover the entire AppBar
+                    ),
+                  ),
+                  AppBar(
+                    title: Text(
+                      "new_password".tr,
+                      style: TextStyle(
+                        fontFamily: 'IRANSansXFaNum',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                    iconTheme: IconThemeData(color: Colors.white),
+                    backgroundColor:
+                        Colors.transparent, // Make AppBar transparent
+                    elevation: 0, // Remove shadow
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+            body: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Form(
+                key: bloc.formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    20.dpv,
+                    buildInputField(
+                      label: "new_password".tr,
+                      hint: "new_password".tr,
+                      onChangeValue: bloc.onPasswordChange,
+                    ),
+                    4.dpv,
+                    buildInputField(
+                      label: "confirm_new_pas".tr,
+                      hint: "confirm_new_pas".tr,
+                      onChangeValue: bloc.onConfirmPasswordChange,
+                    ),
+                    4.dpv,
+                    20.dpv,
+                    ElevatedButton(
+                        onPressed: bloc.onSubmitClick,
+                        child: bloc.state.isLoading
+                            ? const MyLoader(color: Colors.black)
+                            : Text('submit'.tr,
+                                style: TextStyle(
+                                  fontFamily: 'IRANSansXFaNum',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                )))
+                  ],
+                ),
+              ),
+            ));
       },
     );
   }

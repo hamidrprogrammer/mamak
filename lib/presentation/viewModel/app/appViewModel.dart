@@ -1,4 +1,5 @@
 import 'package:core/dioNetwork/interceptor/AuthorizationInterceptor.dart';
+import 'package:core/dioNetwork/interceptor/RefreshTokenInterceptor.dart';
 import 'package:core/dioNetwork/interceptor/culture_interceptor.dart';
 import 'package:core/dioNetwork/kanoonHttp/KanoonHttp.dart';
 import 'package:core/utils/logger/Logger.dart';

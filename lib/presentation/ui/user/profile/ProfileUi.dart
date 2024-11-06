@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:core/dioNetwork/interceptor/culture_interceptor.dart';
 import 'package:core/imagePicker/ImageFileModel.dart';
 import 'package:core/imagePicker/MyImagePicker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -25,6 +28,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'ChildsProfileUi.dart';
 import 'package:flutter/services.dart';
 
 class ProfileUi extends StatefulWidget {
@@ -182,7 +186,7 @@ class _ProfileUiState extends State<ProfileUi> {
                   child: Stack(
                     children: [
                       Positioned.fill(
-                        top: 15,
+                        top: kIsWeb ? 0 : 15,
                         child: Image.asset(
                           'assets/Rectangle21.png', // Path to your SVG file
                           fit: BoxFit.fitWidth,
@@ -384,7 +388,7 @@ class _ProfileUiState extends State<ProfileUi> {
                                 Text(
                                   'user_subscription'.tr,
                                   style: TextStyle(
-                                    fontSize: 10.0,
+                                    fontSize: 8.0,
                                   ),
                                 ),
                                 SizedBox(width: 8.0),

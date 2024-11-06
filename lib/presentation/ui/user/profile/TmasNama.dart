@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -19,7 +20,7 @@ class ContactUsPage extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              top: 15,
+              top: kIsWeb ? 0 : 15,
               child: Image.asset(
                 'assets/Rectangle21.png', // Path to your SVG file
                 fit: BoxFit.fitWidth,

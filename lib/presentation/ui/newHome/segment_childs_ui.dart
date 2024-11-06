@@ -47,7 +47,7 @@ class MenuButtonTow extends StatelessWidget {
       children: [
         iconAsset != null
             ? Image.network(
-                iconAsset,
+                iconAsset!,
                 width: 56,
                 height: 56,
                 fit: BoxFit.cover,

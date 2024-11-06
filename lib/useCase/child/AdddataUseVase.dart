@@ -1,6 +1,6 @@
 import 'package:mamak/config/apiRoute/child/ChildUrls.dart';
 import 'package:mamak/data/body/child/AddChildBody.dart';
-// import 'package:mamak/presentation/ui/user/profile/Meeting.dart';
+import 'package:mamak/presentation/ui/user/profile/Meeting.dart';
 import 'package:mamak/presentation/viewModel/baseViewModel.dart';
 import 'package:mamak/useCase/BaseUseCase.dart';
 
@@ -45,7 +45,7 @@ class AdddataUseVase extends BaseUseCase {
         var result = response.result;
         if (result.resultCode == 200) {
           print("TRUUUUUUUUU");
-          // flow.emitData(getUserMettingResponseFromJson(result.result));
+          flow.emitData(getUserMettingResponseFromJson(result.result));
 
           flow.emitData(result);
           // flow.throwMessage(result.concatSuccessMessages);
@@ -73,7 +73,7 @@ class AdddataUseVase extends BaseUseCase {
         var result = response.result;
         if (result.resultCode == 200) {
           print("TRUUUUUUUUU");
-          // flow.emitData(getAllSupervisorsOfUserChildrenJson(result.result));
+          flow.emitData(getAllSupervisorsOfUserChildrenJson(result.result));
 
           flow.emitData(result);
           // flow.throwMessage(result.concatSuccessMessages);

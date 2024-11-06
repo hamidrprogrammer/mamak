@@ -4,14 +4,16 @@ class ChildUrls {
   static const editChild = "/UserChild/PostEditChildDataByMother";
   static const CreateEmpowermentMeeting =
       "/EmpowermentMeeting/CreateEmpowermentMeeting";
-  static const ChangeEmpowermentMeetingExecutionDate =
-      "/EmpowermentMeeting/CreateEmpowermentMeeting";
-  static const CancelEmpowermentMeeting =
-      "/EmpowermentMeeting/CreateEmpowermentMeeting";
+  static const GetReservedMeeting = "/EmpowermentMeeting/GetReservedMeeting";
   static const GetAllSupervisorsOfUserChildren =
-      "/EmpowermentMeeting/CreateEmpowermentMeeting";
-  static const GetReservedMeeting =
-      "/EmpowermentMeeting/CreateEmpowermentMeeting";
+      "/Supervisor/GetAllSupervisorsOfUserChildren";
+
+  static const CreateEmpowermentMeetingForAnonymousUser =
+      "/EmpowermentMeeting/CreateEmpowermentMeetingForAnonymousUser";
+  static const CancelEmpowermentMeeting =
+      "/EmpowermentMeeting/CancelEmpowermentMeeting";
+  static const ChangeEmpowermentMeetingExecutionDate =
+      "/EmpowermentMeeting/ChangeEmpowermentMeetingExecutionDate";
 
   static const getWorkShopsOfChildUser = "/UserChild/GetWorkShopsOfChildUser";
   static const getAllUserChildWithPackages =

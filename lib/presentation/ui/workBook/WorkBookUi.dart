@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:core/chart/model/ChartModel.dart';
 import 'package:core/chart/radar_chart/radar_chart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -22,8 +23,57 @@ import 'package:mamak/presentation/uiModel/workBook/WorkBookDetailUiModel.dart';
 import 'package:mamak/presentation/viewModel/home/new_home_viewModel.dart';
 import 'package:mamak/presentation/viewModel/workBook/GetParticipatedWorkShopsOfChildUserViewModel.dart';
 
-class WorkBookUi extends StatelessWidget {
+class WorkBookUi extends StatefulWidget {
   const WorkBookUi({Key? key}) : super(key: key);
+  @override
+  _WorkBookUiState createState() => _WorkBookUiState();
+}
+
+class _WorkBookUiState extends State<WorkBookUi> {
+  String? selectedRange;
+  String? selectedRangeTitle;
+
+  List<WorkBook> filteredItems = [];
+  final Map<String, RangeValues> ageRanges = {
+    '3 تا 3/5 سال': RangeValues(3, 3.5),
+    '3/5 تا 4 سال': RangeValues(3.5, 4),
+    '4 تا 4/5 سال': RangeValues(4, 4.5),
+    '4/5 تا 5 سال': RangeValues(4.5, 5),
+    '5 تا 6 سال': RangeValues(5, 6),
+    '6 تا 7 سال': RangeValues(6, 7),
+  };
+  String getNameForSelectedRange(
+      RangeValues selectedRange, Map<String, RangeValues> ageRanges) {
+    // Loop through the map and find the key for the selected range
+    for (var entry in ageRanges.entries) {
+      if (entry.value == selectedRange) {
+        return entry.key; // Return the key when a match is found
+      }
+    }
+    return 'Unknown'; // Return a default value if no match is found
+  }
+
+  void filterItems(List<WorkBook> items) {
+    if (selectedRange != null) {
+      final range = ageRanges[selectedRange]!;
+      final String name = getNameForSelectedRange(range, ageRanges);
+      print('filterItems');
+      print(name);
+
+      setState(() {
+        selectedRangeTitle = name;
+        filteredItems = items
+            .where((item) =>
+                item.fromAgeDomain! >= range.start &&
+                item.toAgeDomain! <= range.end)
+            .toList();
+      });
+    } else {
+      setState(() {
+        filteredItems = List.from(items); // Reset to all items
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +107,7 @@ class WorkBookUi extends StatelessWidget {
                   child: Stack(
                     children: [
                       Positioned.fill(
-                        top: 15,
+                        top: kIsWeb ? 0 : 15,
                         child: Image.asset(
                           'assets/Rectangle21.png',
                           fit: BoxFit.fitWidth,
@@ -138,6 +188,18 @@ class WorkBookUi extends StatelessWidget {
                                       (element) => element.workShopId != -1)) {
                                     data.add(WorkBook(workShopId: -1));
                                   }
+                                  final availableRanges = <String>[];
+
+                                  ageRanges.forEach((key, range) {
+                                    if (data.any((item) =>
+                                        item.fromAgeDomain! >= range.start &&
+                                        item.toAgeDomain! <= range.end)) {
+                                      availableRanges.add(key);
+                                    }
+                                  });
+
+                                  if (availableRanges.length <= 1)
+                                    filteredItems = data;
 
                                   return Column(
                                     children: [
@@ -157,7 +219,7 @@ class WorkBookUi extends StatelessWidget {
                                                 ),
                                           SizedBox(width: 10),
                                           Text(
-                                            '${selectedChild?.childFirstName}',
+                                            '${selectedChild?.childFirstName} ',
                                             style: TextStyle(
                                               fontFamily: 'IRANSansXFaNum',
                                               fontWeight: FontWeight.w600,
@@ -190,19 +252,57 @@ class WorkBookUi extends StatelessWidget {
                                         textAlign: TextAlign.center,
                                       ),
                                       SizedBox(height: 12),
+                                      if (availableRanges.length > 1)
+                                        DropdownButton<String>(
+                                          hint: Text(
+                                            'لطفا سن فرزند خود را انتخاب کنید',
+                                            style: TextStyle(
+                                              fontFamily: 'IRANSansXFaNum',
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 12,
+                                              color:
+                                                  Color.fromARGB(255, 0, 0, 0),
+                                            ),
+                                          ),
+                                          value: selectedRangeTitle,
+                                          items: availableRanges
+                                              .map((String range) {
+                                            return DropdownMenuItem<String>(
+                                              value: range,
+                                              child: Text(
+                                                range,
+                                                style: TextStyle(
+                                                  fontFamily: 'IRANSansXFaNum',
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 12,
+                                                  color: Color.fromARGB(
+                                                      255, 49, 49, 49),
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedRange = newValue;
+                                              filterItems(data);
+                                            });
+                                          },
+                                        ),
+                                      SizedBox(height: 20),
                                       ListView.separated(
                                         shrinkWrap: true,
                                         physics: NeverScrollableScrollPhysics(),
-                                        itemCount: data.length,
+                                        itemCount: filteredItems.length,
                                         itemBuilder: (context, index) {
-                                          if (data[index].workShopId == -1) {
+                                          if (filteredItems[index].workShopId ==
+                                              -1) {
                                             return const SizedBox(height: 50);
                                           }
                                           return Column(
                                             children: [
                                               buildWorkshopSelection(
-                                                '${data[index].workShopTitle}',
-                                                data[index]
+                                                '${filteredItems[index].workShopTitle}',
+                                                filteredItems[index]
                                                         .workShopFileContent ??
                                                     '',
                                                 Color(0xFF82B5CA),
@@ -222,7 +322,7 @@ class WorkBookUi extends StatelessWidget {
                                                                 .toString()) ??
                                                             0.0;
                                                     if (element.workShopFileContent ==
-                                                            data[index]
+                                                            filteredItems[index]
                                                                 .workShopFileContent &&
                                                         pAge < cAge) {
                                                       lastId =
@@ -232,7 +332,8 @@ class WorkBookUi extends StatelessWidget {
                                                     }
                                                   }
                                                   bloc.gotoDetailView(
-                                                      data[index].workShopId,
+                                                      filteredItems[index]
+                                                          .workShopId,
                                                       lastId: lastId,
                                                       lastAgeDomain:
                                                           lastAgeDomain);
@@ -261,114 +362,146 @@ class WorkBookUi extends StatelessWidget {
                                                         reportCard.cards,
                                                         reportCard.categories);
                                                 return Container(
-                                                  height: 350,
+                                                  height: 410,
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
                                                   child: Stack(children: [
                                                     Positioned(
-                                                      top: 70,
-                                                      left: 125,
-                                                      child: GroupWidget(
-                                                        assetName:
-                                                            'assets/group-22-4.svg',
-                                                        backgroundColor:
-                                                            Color.fromARGB(255,
-                                                                    246, 95, 92)
-                                                                .withOpacity(
-                                                                    0.05),
-                                                        text: 'mathematics'.tr,
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      top: 140,
-                                                      left: 10,
-                                                      child: GroupWidget(
-                                                        assetName:
-                                                            'assets/group-22-5.svg',
-                                                        backgroundColor:
-                                                            Color.fromARGB(
-                                                                    255,
-                                                                    84,
-                                                                    163,
-                                                                    197)
-                                                                .withOpacity(
-                                                                    0.05),
-                                                        text: 'life_skills'.tr,
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      top: 140,
-                                                      left: 245,
-                                                      child: GroupWidget(
-                                                        assetName:
-                                                            'assets/group-22-2.svg',
-                                                        backgroundColor:
-                                                            Color.fromARGB(
-                                                                    255,
-                                                                    248,
-                                                                    246,
-                                                                    133)
-                                                                .withOpacity(
-                                                                    0.12),
-                                                        text:
-                                                            'workshop_description'
-                                                                .tr,
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      top: 250,
-                                                      left: 20,
-                                                      child: GroupWidget(
-                                                        assetName:
-                                                            'assets/group-22.svg',
-                                                        backgroundColor:
-                                                            Color.fromARGB(
-                                                                    255,
-                                                                    253,
-                                                                    154,
-                                                                    149)
-                                                                .withOpacity(
-                                                                    0.05),
-                                                        text: 'reading_literacy'
-                                                            .tr,
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      top: 250,
-                                                      left: 230,
-                                                      child: GroupWidget(
-                                                        assetName:
-                                                            'assets/group-22-3.svg',
-                                                        backgroundColor:
-                                                            Color.fromARGB(
-                                                                    255,
-                                                                    220,
-                                                                    132,
-                                                                    191)
-                                                                .withOpacity(
-                                                                    0.12),
-                                                        text: 'art'.tr,
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      top: 315,
-                                                      left: 288,
-                                                      child: LegendWidget(
-                                                        color:
-                                                            Color(0xFF3D9C68),
-                                                        text: 'first_assessment'
-                                                            .tr,
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      top: 315,
-                                                      left: 190,
-                                                      child: LegendWidget(
-                                                        color:
-                                                            Color(0xFFF15B67),
-                                                        text:
-                                                            'second_assessment'
-                                                                .tr,
-                                                      ),
-                                                    ),
+                                                        child: Center(
+                                                      child: Column(children: [
+                                                        SizedBox(
+                                                          height: 60,
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceAround,
+                                                          children: [
+                                                            Expanded(
+                                                              child:
+                                                                  GroupWidget(
+                                                                assetName:
+                                                                    'assets/group-22-4.svg',
+                                                                backgroundColor: Color
+                                                                        .fromARGB(
+                                                                            255,
+                                                                            246,
+                                                                            95,
+                                                                            92)
+                                                                    .withOpacity(
+                                                                        0.05),
+                                                                text: 'mathematics'
+                                                                    .tr, // Use 'mathematics'.tr if using localization
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+
+                                                        SizedBox(
+                                                            height:
+                                                                8), // Space between rows
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            GroupWidget(
+                                                              assetName:
+                                                                  'assets/group-22-2.svg',
+                                                              backgroundColor:
+                                                                  Color.fromARGB(
+                                                                          255,
+                                                                          248,
+                                                                          246,
+                                                                          133)
+                                                                      .withOpacity(
+                                                                          0.12),
+                                                              text: 'workshop_description'
+                                                                  .tr, // Use 'workshop_description'.tr if using localization
+                                                            ),
+                                                            GroupWidget(
+                                                              assetName:
+                                                                  'assets/group-22-5.svg',
+                                                              backgroundColor:
+                                                                  Color.fromARGB(
+                                                                          255,
+                                                                          84,
+                                                                          163,
+                                                                          197)
+                                                                      .withOpacity(
+                                                                          0.05),
+                                                              text: 'life_skills'
+                                                                  .tr, // Use 'life_skills'.tr if using localization
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        // Row for bottom items
+                                                        SizedBox(height: 20),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            GroupWidget(
+                                                              assetName:
+                                                                  'assets/group-22-3.svg',
+                                                              backgroundColor:
+                                                                  Color.fromARGB(
+                                                                          255,
+                                                                          220,
+                                                                          132,
+                                                                          191)
+                                                                      .withOpacity(
+                                                                          0.12),
+                                                              text: 'art'
+                                                                  .tr, // Use 'art'.tr if using localization
+                                                            ),
+                                                            GroupWidget(
+                                                              assetName:
+                                                                  'assets/group-22.svg',
+                                                              backgroundColor:
+                                                                  Color.fromARGB(
+                                                                          255,
+                                                                          253,
+                                                                          154,
+                                                                          149)
+                                                                      .withOpacity(
+                                                                          0.05),
+                                                              text: 'reading_literacy'
+                                                                  .tr, // Use 'reading_literacy'.tr if using localization
+                                                            ),
+                                                          ],
+                                                        ),
+
+                                                        SizedBox(
+                                                            height:
+                                                                20), // Space between legend and previous rows
+
+                                                        // Legend widgets
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            LegendWidget(
+                                                              color: Color(
+                                                                  0xFF3D9C68),
+                                                              text: 'first_assessment'
+                                                                  .tr, // Use 'first_assessment'.tr if using localization
+                                                            ),
+                                                            SizedBox(
+                                                                width:
+                                                                    20), // Space between legends
+                                                            LegendWidget(
+                                                              color: Color(
+                                                                  0xFFF15B67),
+                                                              text: 'second_assessment'
+                                                                  .tr, // Use 'second_assessment'.tr if using localization
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ]),
+                                                    )),
                                                     Center(
                                                       child: Column(
                                                         children: [

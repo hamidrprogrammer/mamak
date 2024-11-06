@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -82,7 +83,7 @@ class _MyWorkShopsState extends State<MyWorkShops> {
         child: Stack(
           children: [
             Positioned.fill(
-              top: 15,
+              top: kIsWeb ? 0 : 15,
               child: Image.asset(
                 'assets/Rectangle21.png',
                 fit: BoxFit.fitWidth,
@@ -131,14 +132,22 @@ class _MyWorkShopsState extends State<MyWorkShops> {
               itemCount: favorites.length,
               itemBuilder: (context, index) {
                 var data = favorites[index];
-                return SavedItem(
-                    item: data,
-                    onRemove: () {
-                      setState(() {
-                        favorites
-                            .removeAt(index); // Remove from UI after deletion
-                      });
-                    });
+                return InkWell(
+                    onTap: () {
+                      // Your tap functionality here
+                      Get.toNamed(
+                        AppRoute.workDetails,
+                        arguments: data,
+                      );
+                    },
+                    child: SavedItem(
+                        item: data,
+                        onRemove: () {
+                          setState(() {
+                            favorites.removeAt(
+                                index); // Remove from UI after deletion
+                          });
+                        }));
               },
             ),
     );

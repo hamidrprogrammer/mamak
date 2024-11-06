@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -90,7 +91,7 @@ class _AssessmentsUiState extends State<AssessmentsUi> {
             child: Stack(
               children: [
                 Positioned.fill(
-                  top: 15,
+                  top: kIsWeb ? 0 : 15,
                   child: Image.asset(
                     'assets/Rectangle21.png', // Path to your SVG file
                     fit: BoxFit.fitWidth,

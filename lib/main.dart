@@ -26,18 +26,15 @@ class BaseLayout extends StatelessWidget {
       appBar: AppBar(title: Text('Responsive Web App')),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth > 700) {
-            // For larger screens
-            return Center(
-              child: Container(
-                width: 700, // Fix width to 700 for large screens
-                child: child, // Use the provided screen content
-              ),
-            );
-          } else {
-            // For smaller screens
-            return child; // Full width on smaller screens
-          }
+          double screenWidth = constraints.maxWidth;
+          return Center(
+            child: Container(
+              width: screenWidth < 600
+                  ? screenWidth // Mobile: full width
+                  : 414,
+              child: child, // Use the provided screen content
+            ),
+          );
         },
       ),
     );

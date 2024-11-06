@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -21,6 +22,7 @@ import 'package:mamak/presentation/ui/user/ChangePasswordUi.dart';
 import 'package:mamak/presentation/ui/user/ForgetPasswordUi.dart';
 import 'package:mamak/presentation/ui/user/RecoveryPasswordUi.dart';
 import 'package:mamak/presentation/ui/user/VerificationUi.dart';
+import 'package:mamak/presentation/ui/user/VirfiyCodePassword.dart';
 import 'package:mamak/presentation/ui/user/profile/CalendarScreen.dart';
 import 'package:mamak/presentation/ui/user/profile/TmasNama.dart';
 import 'package:mamak/presentation/ui/workBook/WorkBookDetailUi.dart';
@@ -34,6 +36,10 @@ class AppRouteHelper {
     GetPage(
       name: AppRoute.login,
       page: () => BaseLayout(child: const LoginUi()),
+    ),
+    GetPage(
+      name: AppRoute.virfiyCodePassword,
+      page: () => BaseLayout(child: const VirfiyCodePassword()),
     ),
     GetPage(
       name: AppRoute.register,
@@ -145,18 +151,23 @@ class BaseLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // For larger screens
-          return Center(
-            child: Container(
-              width: 370,
-              child: child,
-            ),
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double screenWidth = constraints.maxWidth;
+        return Center(
+          child: Container(
+            width: screenWidth < 600
+                ? screenWidth // Mobile: full width
+                : 414,
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                  textScaleFactor:
+                      kIsWeb ? 1.1 : 1.2), // Adjust this value to scale text
+              child: child!,
+            ), // Use the provided screen content
+          ),
+        );
+      },
     );
   }
 }

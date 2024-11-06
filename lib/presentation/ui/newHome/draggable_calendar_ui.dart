@@ -172,6 +172,9 @@ class _DraggableCalendarUiState extends State<DraggableCalendarUi> {
             ),
           ),
         ),
+        SizedBox(
+          height: 15,
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
@@ -179,11 +182,14 @@ class _DraggableCalendarUiState extends State<DraggableCalendarUi> {
             style: TextStyle(
               fontFamily: 'IRANSansXFaNum',
               fontWeight: FontWeight.w500,
-              fontSize: 12,
+              fontSize: 10,
               color: Color(0xFF2E754E),
             ),
             textAlign: TextAlign.right,
           ),
+        ),
+        SizedBox(
+          height: 15,
         ),
         Padding(
           padding: 16.dpeh,
@@ -191,6 +197,7 @@ class _DraggableCalendarUiState extends State<DraggableCalendarUi> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
+                width: 180,
                 decoration: BoxDecoration(
                   borderRadius: 16.bRadius,
                   border: Border.all(color: Color.fromARGB(255, 165, 0, 69)),

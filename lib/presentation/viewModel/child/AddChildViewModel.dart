@@ -59,12 +59,52 @@ class AddChildViewModel extends BaseViewModel {
       print(_formStateDate.executionDate);
       print(appState.isSuccess);
       if (appState.isSuccess) {
+        messageService.showSnackBar("جلسه شما با موفقیت رزرو شد.");
         _navigationServiceImpl.pop();
       }
       if (appState.isFailed) {
         messageService.showSnackBar(appState.getErrorModel?.message ?? '');
       }
     }), data: _formStateDate.createBody());
+  }
+
+  void submitDateGetReservedMeeting() {
+    AdddataUseVase().getReservedMeeting(MyFlow(flow: (appState) {
+      print(appState.isSuccess);
+      if (appState.isSuccess) {}
+      if (appState.isFailed) {
+        messageService.showSnackBar(appState.getErrorModel?.message ?? '');
+      }
+    }));
+  }
+
+  void submitChangeEmpowermentMeetingExecutionDate() {
+    AdddataUseVase().ChangeEmpowermentMeetingExecutionDate(
+        MyFlow(flow: (appState) {
+      print(_formStateDate.executionDate);
+      print(appState.isSuccess);
+      if (appState.isSuccess) {
+        messageService.showSnackBar("جاسه شما با موفقیت تغییر پیدا کرد ");
+        _navigationServiceImpl.pop();
+      }
+      if (appState.isFailed) {
+        messageService.showSnackBar(appState.getErrorModel?.message ?? '');
+      }
+    }), data: _formStateDate.createBody());
+  }
+
+  void cancelEmpowermentMeeting() {
+    AdddataUseVase().cancelEmpowermentMeeting(MyFlow(flow: (appState) {
+      print(_formStateDate.executionDate);
+      print(appState.isSuccess);
+      if (appState.isSuccess) {
+        messageService.showSnackBar("جلسه شما حدف شد.");
+        _navigationServiceImpl.pop();
+      }
+      if (appState.isFailed) {
+        messageService.showSnackBar(appState.getErrorModel?.message ?? '');
+      }
+    }));
   }
 
   void submit() {

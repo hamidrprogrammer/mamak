@@ -1,18 +1,66 @@
+import 'package:core/utils/flow/MyFlow.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mamak/core/form/validator/EmailValidator.dart';
 import 'package:mamak/core/form/validator/MobileValidator.dart';
 import 'package:mamak/core/form/validator/NameValidator.dart';
+import 'package:mamak/presentation/state/NetworkExtensions.dart';
 import 'package:mamak/presentation/state/app_state.dart';
 import 'package:mamak/presentation/ui/main/CubitProvider.dart';
 import 'package:mamak/presentation/ui/main/MamakScaffold.dart';
 import 'package:mamak/presentation/ui/main/TextFormFieldHelper.dart';
 import 'package:mamak/presentation/ui/main/UiExtension.dart';
+import 'package:mamak/presentation/ui/user/profile/Meeting.dart';
 import 'package:mamak/presentation/viewModel/app/ContactUsViewModel.dart';
+import 'package:mamak/useCase/child/AdddataUseVase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SourceUi extends StatelessWidget {
-  const SourceUi({super.key});
+class SourceUi extends StatefulWidget {
+  const SourceUi({Key? key}) : super(key: key);
+  @override
+  _SourceUiUiState createState() => _SourceUiUiState();
+}
+
+class _SourceUiUiState extends State<SourceUi> {
+  bool isLoading = false;
+  String errorMessage = '';
+  late List<Supervisors> supervisorsData = [];
+
+  @override
+  void initState() {
+    getReservedMeeting();
+    super.initState();
+  }
+
+  void getReservedMeeting() {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    AdddataUseVase().getAllSupervisorsOfUserChildren(MyFlow(flow: (appState) {
+      setState(() {
+        isLoading = false;
+        if (appState.isSuccess) {
+          print("appState.getData is Meeting");
+          print(appState.getData is List<Supervisors>);
+          // Assuming `getReservedMeetings` returns a list of meetings
+          if (appState.getData is List<Supervisors>) {
+            List<Supervisors> response = appState.getData;
+            supervisorsData = response;
+            setState(() {
+              supervisorsData = response;
+            });
+          }
+        } else if (appState.isFailed) {
+          errorMessage =
+              appState.getErrorModel?.message ?? 'Failed to fetch meetings';
+        }
+      });
+    }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return CubitProvider(
@@ -24,7 +72,7 @@ class SourceUi extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned.fill(
-                  top: 15,
+                  top: kIsWeb ? 0 : 15,
                   child: Image.asset(
                     'assets/Rectangle21.png', // Path to your SVG file
                     fit: BoxFit.fitWidth,
@@ -54,63 +102,74 @@ class SourceUi extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
-                  // Information about the advisor
-                  buildSectionContainer(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        buildSectionHeader(
-                            'advisor_info'.tr), // replaced Farsi text
-                        divider(),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Sara_Mousavi'.tr, // replaced Farsi text
-                                style: TextStyle(
-                                  fontFamily: 'IRANSansXFaNum',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                  color: Color(0xFF272930),
-                                ),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: supervisorsData.length,
+                    itemBuilder: (context, index) {
+                      Supervisors data = supervisorsData[index];
+                      return buildSectionContainer(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildSectionHeader(
+                                'advisor_info'.tr), // replaced Farsi text
+                            divider(),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${data.FirstName} ${data.LastName}', // replaced Farsi text
+                                    style: TextStyle(
+                                      fontFamily: 'IRANSansXFaNum',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      color: Color(0xFF272930),
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '${data.ChildFirstName} ${data.ChildLastName}', // replaced Farsi text
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: 'IRANSansXFaNum',
+                                      color: Color(0xFF353842),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    '${data.Mobile} ',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: 'IRANSansXFaNum',
+                                      color: Color(0xFF0197F6),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                'child_psychologist'.tr, // replaced Farsi text
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'IRANSansXFaNum',
-                                  color: Color(0xFF353842),
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '0912356269',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'IRANSansXFaNum',
-                                  color: Color(0xFF0197F6),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const Divider(),
                   ),
-                  // Session information
-                  buildSessionInfo(
-                      'session_info_x'.tr, // replaced Farsi text
-                      'session_description_x'.tr, // replaced Farsi text
-                      'session_date_info_x'.tr, // replaced Farsi text
-                      'session_status_attended'.tr), // replaced Farsi text
-                  buildSessionInfo(
-                      'intro_session_info'.tr, // replaced Farsi text
-                      'session_description_intro'.tr, // replaced Farsi text
-                      'session_date_info_intro'.tr, // replaced Farsi text
-                      'session_status_missed'.tr), // replaced Farsi text
+                  // Information about the advisor
+
+                  // // Session information
+                  // buildSessionInfo(
+                  //     'session_info_x'.tr, // replaced Farsi text
+                  //     'session_description_x'.tr, // replaced Farsi text
+                  //     'session_date_info_x'.tr, // replaced Farsi text
+                  //     'session_status_attended'.tr), // replaced Farsi text
+                  // buildSessionInfo(
+                  //     'intro_session_info'.tr, // replaced Farsi text
+                  //     'session_description_intro'.tr, // replaced Farsi text
+                  //     'session_date_info_intro'.tr, // replaced Farsi text
+                  //     'session_status_missed'.tr), // replaced Farsi text
                 ],
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:core/chart.dart';
 import 'package:feature/navigation/NavigationService.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -216,7 +217,7 @@ class WorkBookDetailUi extends StatelessWidget {
                   child: Stack(
                     children: [
                       Positioned.fill(
-                        top: 15,
+                        top: kIsWeb ? 0 : 15,
                         child: Image.asset(
                           'assets/Rectangle21.png', // Path to your SVG file
                           fit: BoxFit.fitWidth,
@@ -317,84 +318,126 @@ class WorkBookDetailUi extends StatelessWidget {
                                             reportCard.cards,
                                             reportCard.categories);
                                         return Container(
-                                          height: 350,
+                                          height: 410,
+                                          padding: const EdgeInsets.all(8.0),
                                           child: Stack(children: [
                                             Positioned(
-                                              top: 60,
-                                              left: 125,
-                                              child: GroupWidget(
-                                                assetName:
-                                                    'assets/group-22-4.svg',
-                                                backgroundColor:
-                                                    Color(0xFFF66967)
-                                                        .withOpacity(0.05),
-                                                text: 'mathematics'.tr,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 130,
-                                              left: 13,
-                                              child: GroupWidget(
-                                                assetName:
-                                                    'assets/group-22.svg',
-                                                backgroundColor: Color.fromARGB(
-                                                        255, 80, 139, 164)
-                                                    .withOpacity(0.05),
-                                                text: 'reading_literacy'.tr,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 130,
-                                              left: 240,
-                                              child: GroupWidget(
-                                                assetName:
-                                                    'assets/group-22-2.svg',
-                                                backgroundColor:
-                                                    Color(0xFFFEFC95)
-                                                        .withOpacity(0.12),
-                                                text: 'workshop_description'.tr,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 240,
-                                              left: 25,
-                                              child: GroupWidget(
-                                                assetName:
-                                                    'assets/group-22-5.svg',
-                                                backgroundColor: Color.fromARGB(
-                                                        255, 248, 177, 173)
-                                                    .withOpacity(0.05),
-                                                text: 'life_skills'.tr,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 240,
-                                              left: 230,
-                                              child: GroupWidget(
-                                                assetName:
-                                                    'assets/group-22-3.svg',
-                                                backgroundColor:
-                                                    Color(0xFFD291BC)
-                                                        .withOpacity(0.12),
-                                                text: 'art'.tr,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 315,
-                                              left: 288,
-                                              child: LegendWidget(
-                                                color: Color(0xFF3D9C68),
-                                                text: 'first_assessment'.tr,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 315,
-                                              left: 190,
-                                              child: LegendWidget(
-                                                color: Color(0xFFF15B67),
-                                                text: 'second_assessment'.tr,
-                                              ),
-                                            ),
+                                                child: Center(
+                                              child: Column(children: [
+                                                SizedBox(
+                                                  height: 60,
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  children: [
+                                                    Expanded(
+                                                      child: GroupWidget(
+                                                        assetName:
+                                                            'assets/group-22-4.svg',
+                                                        backgroundColor:
+                                                            Color.fromARGB(255,
+                                                                    246, 95, 92)
+                                                                .withOpacity(
+                                                                    0.05),
+                                                        text: 'mathematics'
+                                                            .tr, // Use 'mathematics'.tr if using localization
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                SizedBox(
+                                                    height:
+                                                        8), // Space between rows
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    GroupWidget(
+                                                      assetName:
+                                                          'assets/group-22-2.svg',
+                                                      backgroundColor:
+                                                          Color.fromARGB(255,
+                                                                  248, 246, 133)
+                                                              .withOpacity(
+                                                                  0.12),
+                                                      text: 'workshop_description'
+                                                          .tr, // Use 'workshop_description'.tr if using localization
+                                                    ),
+                                                    GroupWidget(
+                                                      assetName:
+                                                          'assets/group-22-5.svg',
+                                                      backgroundColor:
+                                                          Color.fromARGB(255,
+                                                                  84, 163, 197)
+                                                              .withOpacity(
+                                                                  0.05),
+                                                      text: 'life_skills'
+                                                          .tr, // Use 'life_skills'.tr if using localization
+                                                    ),
+                                                  ],
+                                                ),
+                                                // Row for bottom items
+                                                SizedBox(height: 20),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    GroupWidget(
+                                                      assetName:
+                                                          'assets/group-22-3.svg',
+                                                      backgroundColor:
+                                                          Color.fromARGB(255,
+                                                                  220, 132, 191)
+                                                              .withOpacity(
+                                                                  0.12),
+                                                      text: 'art'
+                                                          .tr, // Use 'art'.tr if using localization
+                                                    ),
+                                                    GroupWidget(
+                                                      assetName:
+                                                          'assets/group-22.svg',
+                                                      backgroundColor:
+                                                          Color.fromARGB(255,
+                                                                  253, 154, 149)
+                                                              .withOpacity(
+                                                                  0.05),
+                                                      text: 'reading_literacy'
+                                                          .tr, // Use 'reading_literacy'.tr if using localization
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                SizedBox(
+                                                    height:
+                                                        20), // Space between legend and previous rows
+
+                                                // Legend widgets
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    LegendWidget(
+                                                      color: Color(0xFF3D9C68),
+                                                      text: 'first_assessment'
+                                                          .tr, // Use 'first_assessment'.tr if using localization
+                                                    ),
+                                                    SizedBox(
+                                                        width:
+                                                            20), // Space between legends
+                                                    LegendWidget(
+                                                      color: Color(0xFFF15B67),
+                                                      text: 'second_assessment'
+                                                          .tr, // Use 'second_assessment'.tr if using localization
+                                                    ),
+                                                  ],
+                                                ),
+                                              ]),
+                                            )),
                                             Center(
                                               child: Column(
                                                 children: [

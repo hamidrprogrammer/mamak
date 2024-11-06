@@ -3,19 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:mamak/config/uiCommon/WidgetSize.dart';
-import 'package:mamak/core/form/validator/LastNameValidator.dart';
-import 'package:mamak/core/form/validator/NameValidator.dart';
+
 import 'package:mamak/presentation/ui/main/CubitProvider.dart';
-import 'package:mamak/presentation/ui/main/MamakLogo.dart';
 import 'package:mamak/presentation/ui/main/MyLoader.dart';
-import 'package:mamak/presentation/ui/main/PasswordFieldHelper.dart';
-import 'package:mamak/presentation/ui/main/TextFormFieldHelper.dart';
-import 'package:mamak/presentation/ui/main/UiExtension.dart';
-import 'package:mamak/presentation/ui/recaptcha/recaptcha.dart';
 import 'package:mamak/presentation/ui/recaptcha/recaptcha.dart';
 
-import 'package:mamak/presentation/ui/register/text_with_link.dart';
 import 'package:mamak/presentation/viewModel/baseViewModel.dart';
 import 'package:mamak/presentation/viewModel/user/SignUpViewModel.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -208,7 +200,7 @@ class RegisterUi extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned.fill(
-                  top: 15,
+                  top: kIsWeb ? 0 : 30,
                   child: Image.asset(
                     'assets/Rectangle21.png', // Path to your SVG file
                     fit: BoxFit.fitWidth,
@@ -314,38 +306,39 @@ class RegisterUi extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: kIsWeb ? 5 : 30),
 
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Column(
                         children: [
+                          if (!kIsWeb) SizedBox(height: 15),
                           if (kIsWeb)
                             SizedBox(
-                                width: 100,
-                                height: 300,
+                                width: 400,
+                                height: 110,
                                 child: Recaptcha(
                                   onChangeToken: bloc.onChangeToken,
                                 )),
-                          SizedBox(height: 15),
-                          ElevatedButton(
-                            onPressed: bloc.register.call(),
-                            child: Center(
-                              child: bloc.uiState.isLoading
-                                  ? const MyLoader(color: Colors.black)
-                                  : Text(
-                                      "continue".tr,
-                                      style: TextStyle(
-                                        fontFamily: 'IRANSansXFaNum',
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
-                          ),
                         ],
                       )),
+                  ElevatedButton(
+                    onPressed: bloc.register.call(),
+                    child: Center(
+                      child: bloc.uiState.isLoading
+                          ? const MyLoader(color: Colors.black)
+                          : Text(
+                              "continue".tr,
+                              style: TextStyle(
+                                fontFamily: 'IRANSansXFaNum',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+
                   SizedBox(height: 8),
                   Center(
                     child: TextButton(

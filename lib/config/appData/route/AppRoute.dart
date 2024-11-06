@@ -8,7 +8,7 @@ class AppRoute {
   static const subscription = '/subscription';
   static const eitChildPage = '/eitChildPage';
   static const contactUsApp = '/contactUsApp';
-  static const virfiyCodePassword = '/contactUsApp';
+  static const virfiyCodePassword = '/virfiyCodePassword';
 
   static const verification = '/verification';
   static const forgetPassword = '/forgetPassword';

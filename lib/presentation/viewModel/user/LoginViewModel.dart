@@ -80,6 +80,9 @@ class LoginViewModel extends BaseViewModel {
 
   Future<bool> saveUserData(User user) {
     GetIt.I.get<AuthorizationInterceptor>().setToken(user.token ?? '');
+    GetIt.I
+        .get<AuthorizationInterceptor>()
+        .setrefreshToken(user.refreshToken ?? '');
     var map = {
       UserSessionConst.token: '${user.token}',
       UserSessionConst.fullName: '${user.fullName}',

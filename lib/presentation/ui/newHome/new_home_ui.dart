@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:core/chart/model/ChartModel.dart';
 import 'package:core/chart/radar_chart/radar_chart.dart';
+import 'package:core/dioNetwork/interceptor/AuthorizationInterceptor.dart';
+import 'package:core/utils/flow/MyFlow.dart';
 import 'package:feature/navigation/NavigationService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -12,15 +14,19 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
+import 'package:mamak/common/user/UserSessionConst.dart';
 import 'package:mamak/config/appData/route/AppRoute.dart';
 import 'package:mamak/config/uiCommon/MyTheme.dart';
 import 'package:mamak/data/serializer/assessment/QuestionsResponse.dart';
 import 'package:mamak/data/serializer/calendar/UserCalendarResponse.dart';
+import 'package:mamak/data/serializer/user/User.dart';
 import 'package:mamak/presentation/ui/assessment/AssessmentItemUi.dart';
 import 'package:mamak/presentation/ui/main/MamakTitle.dart';
 import 'package:mamak/presentation/ui/newHome/CalendarItemUi.dart';
 import 'package:mamak/presentation/uiModel/assessmeny/AssessmentParamsModel.dart';
 import 'package:mamak/presentation/viewModel/assessments/AssessmentsViewModel.dart';
+import 'package:mamak/useCase/user/LoginUseCase.dart';
+import 'package:mamak/useCase/user/RefreshTokenUseCase.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
 import 'package:mamak/data/serializer/child/WorkShopOfUserResponse.dart';
@@ -80,12 +86,13 @@ class _CarouselExampleState extends State<CarouselExample> {
         skeleton: const MyLoaderBig(),
         state: widget.state,
         onSuccess: (childs) {
+          print("childs=>>>>>>>>>>>>>");
           var index = 0;
           if (widget.selectedChild?.id != null) {
             print(widget.selectedChild!.id.toString());
             index = childs.indexWhere((child) =>
                 child.id.toString() == widget.selectedChild!.id.toString());
-            if (index < 0) {
+            if (index == null || index < 0) {
               index = 0;
             }
             print(index);
@@ -116,7 +123,7 @@ class _CarouselExampleState extends State<CarouselExample> {
             children: [
               CarouselSlider(
                 options: CarouselOptions(
-                  height: 130, // Height to accommodate image + text
+                  height: 150, // Height to accommodate image + text
                   autoPlay: false,
                   enlargeCenterPage: true,
                   initialPage: index,
@@ -132,7 +139,7 @@ class _CarouselExampleState extends State<CarouselExample> {
                     int index = entry.key;
                     String name =
                         '${entry.value.childFirstName} ${entry.value.childLastName}';
-
+                    String age = '${entry.value.childAge}';
                     // Regular image slides
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -153,7 +160,7 @@ class _CarouselExampleState extends State<CarouselExample> {
                                   height: 50,
                                 ),
                               ),
-                        SizedBox(height: 10), // Space between image and text
+                        SizedBox(height: 5), // Space between image and text
                         Text(
                           "${name}",
                           textAlign: TextAlign.center, // Center the text
@@ -161,6 +168,16 @@ class _CarouselExampleState extends State<CarouselExample> {
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: 3), // Space between image and text
+                        Text(
+                          "${age}",
+                          textAlign: TextAlign.center, // Center the text
+
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: const Color.fromARGB(255, 240, 208, 208),
                           ),
                         ),
                       ],
@@ -221,7 +238,7 @@ class AssessmentApp extends StatelessWidget {
               Expanded(
                 child: AssessmentCard(
                   width: widthNormal,
-                  height: 150,
+                  height: 170,
                   title: '${items[0].workShopTitle}',
                   imagePath: './assets/layer-1-2.svg',
                   backgroundColor: Colors.white,
@@ -236,7 +253,7 @@ class AssessmentApp extends StatelessWidget {
               Expanded(
                 child: AssessmentCard(
                   width: widthNormal,
-                  height: 150,
+                  height: 170,
                   title: '${items[1].workShopTitle}',
                   imagePath: './assets/group-48097769-5.svg',
                   backgroundColor: Colors.white,
@@ -255,7 +272,7 @@ class AssessmentApp extends StatelessWidget {
               Expanded(
                 child: AssessmentCard(
                   width: widthNormal,
-                  height: 150,
+                  height: 170,
                   title: '${items[2].workShopTitle}',
                   imagePath: './assets/group-48097769-4.svg',
                   backgroundColor: Colors.white,
@@ -271,7 +288,7 @@ class AssessmentApp extends StatelessWidget {
               Expanded(
                 child: AssessmentCard(
                   width: widthNormal,
-                  height: 150,
+                  height: 170,
                   title: '${items[3].workShopTitle}',
                   imagePath: './assets/group-48097769-3.svg',
                   backgroundColor: Colors.white,
@@ -288,7 +305,7 @@ class AssessmentApp extends StatelessWidget {
         if (items.length > 4)
           AssessmentCardTWO(
             width: screenWidth,
-            height: 80,
+            height: 90,
             title: '${items[4].workShopTitle}',
             imagePath: './assets/vectors/group_20_x2.svg',
             backgroundColor: Colors.white,
@@ -596,7 +613,54 @@ class NewHomeUi extends StatefulWidget {
   State<NewHomeUi> createState() => _NewHomeUiState();
 }
 
-class _NewHomeUiState extends State<NewHomeUi> {
+class _NewHomeUiState extends State<NewHomeUi> with WidgetsBindingObserver {
+  bool _isKilled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _onAppReopened();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // App has resumed from the background
+      if (_isKilled) {
+        _onAppReopened();
+        _isKilled = false; // Reset the flag
+      }
+    } else if (state == AppLifecycleState.paused) {
+      // App is in the background
+      _isKilled = true; // Set the flag to true if app goes to background
+    }
+  }
+
+  void _onAppReopened() {
+    RefreshUseCase().invoke(MyFlow(flow: (state) {
+      if (state.isSuccess) {
+        if (state.getData is User) {
+          var user = state.getData as User;
+
+          GetIt.I.get<AuthorizationInterceptor>().setToken(user.token ?? '');
+          GetIt.I
+              .get<AuthorizationInterceptor>()
+              .setrefreshToken(user.refreshToken ?? '');
+        }
+      }
+    }));
+
+    // Your function to call when the app is reopened
+    print('App was killed and reopened');
+    // You can place any function here
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -618,7 +682,7 @@ class _NewHomeUiState extends State<NewHomeUi> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Container(
-                            height: 200,
+                            height: 230,
                             decoration: BoxDecoration(
                               image: DecorationImage(
                                 image: AssetImage('assets/image.png'),
@@ -651,7 +715,7 @@ class _NewHomeUiState extends State<NewHomeUi> {
                                           MainAxisAlignment.center,
                                       children: [
                                     SizedBox(
-                                      height: 25,
+                                      height: 45,
                                     ),
                                     SvgPicture.asset('assets/group-63.svg'),
                                     FutureBuilder(
@@ -665,6 +729,13 @@ class _NewHomeUiState extends State<NewHomeUi> {
                                           } else {
                                             print("nullllllllll");
                                           }
+                                          if (state.isLoading)
+                                            return LoadingAnimationWidget
+                                                .hexagonDots(
+                                              color: Color.fromARGB(
+                                                  255, 255, 255, 255),
+                                              size: 45,
+                                            );
 
                                           return CarouselExample(
                                             onSelectChild:
@@ -697,6 +768,13 @@ class _NewHomeUiState extends State<NewHomeUi> {
                                       skeleton: const MyLoaderBig(),
                                       state: state,
                                       onSuccess: (data) {
+                                        if (state.isLoading)
+                                          return LoadingAnimationWidget
+                                              .hexagonDots(
+                                            color: Color.fromARGB(
+                                                255, 246, 5, 121),
+                                            size: 45,
+                                          );
                                         List<ChildWorkShops> items = (data
                                                     .activeUserChildWorkShops ??
                                                 []) +
@@ -711,32 +789,35 @@ class _NewHomeUiState extends State<NewHomeUi> {
                                                   SizedBox(height: 20),
                                                   Row(
                                                     children: [
-                                                      SvgPicture.asset(
-                                                        'assets/vectors/ellipse_504_x2.svg',
-                                                        width: 5,
-                                                        height: 5,
-                                                      ),
-                                                      SizedBox(width: 10),
-                                                      Text(
-                                                        'Evaluation_workshops'
-                                                            .tr,
-                                                        style: TextStyle(
-                                                          fontFamily:
-                                                              'IRANSansXFaNum',
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontSize: 13,
-                                                          color:
-                                                              Color(0xFF272930),
+                                                      if (items.length > 0)
+                                                        SvgPicture.asset(
+                                                          'assets/vectors/ellipse_504_x2.svg',
+                                                          width: 5,
+                                                          height: 5,
                                                         ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
+                                                      SizedBox(width: 10),
+                                                      if (items.length > 0)
+                                                        Text(
+                                                          'Evaluation_workshops'
+                                                              .tr,
+                                                          style: TextStyle(
+                                                            fontFamily:
+                                                                'IRANSansXFaNum',
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            fontSize: 13,
+                                                            color: Color(
+                                                                0xFF272930),
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
                                                     ],
                                                   ),
-                                                  AssessmentApp(
-                                                      items: items,
-                                                      child: selectedChild),
+                                                  if (items.length > 0)
+                                                    AssessmentApp(
+                                                        items: items,
+                                                        child: selectedChild),
                                                 ],
                                               )),
                                         );
@@ -761,6 +842,38 @@ class _NewHomeUiState extends State<NewHomeUi> {
                                     showError: false,
                                     state: bloc.reportCardState,
                                     onSuccess: (reportCard) {
+                                      if (state.isLoading)
+                                        return LoadingAnimationWidget
+                                            .hexagonDots(
+                                          color:
+                                              Color.fromARGB(255, 246, 5, 121),
+                                          size: 45,
+                                        );
+                                      if (state is Error ||
+                                          reportCard.cards.length == 0) {
+                                        print("EROOOOOOOOOOOOOOOOOOOOOR");
+                                        return Center(
+                                          child: Column(
+                                            children: [
+                                              Image.asset(
+                                                'assets/icons8_folder.png',
+                                                width: 150,
+                                                height: 150,
+                                              ),
+                                              Text(
+                                                "no_workbook".tr,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'IRANSansXFaNum',
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                  color: Color(0xFF272930),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
                                       if (reportCard.cards.length == 0)
                                         return Container();
 
@@ -768,83 +881,227 @@ class _NewHomeUiState extends State<NewHomeUi> {
                                           reportCard.cards,
                                           reportCard.categories);
                                       return Container(
-                                        height: 350,
+                                        height: 410,
+                                        padding: const EdgeInsets.all(10.0),
                                         child: Stack(children: [
                                           Positioned(
-                                            top: 70,
-                                            left: 137,
-                                            child: GroupWidget(
-                                              assetName:
-                                                  'assets/group-22-4.svg',
-                                              backgroundColor: Color.fromARGB(
-                                                      255, 246, 95, 92)
-                                                  .withOpacity(0.05),
-                                              text: 'mathematics'.tr,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 140,
-                                            left: 10,
-                                            child: GroupWidget(
-                                              assetName:
-                                                  'assets/group-22-5.svg',
-                                              backgroundColor: Color.fromARGB(
-                                                      255, 84, 163, 197)
-                                                  .withOpacity(0.05),
-                                              text: 'life_skills'.tr,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 130,
-                                            left: 260,
-                                            child: GroupWidget(
-                                              assetName:
-                                                  'assets/group-22-2.svg',
-                                              backgroundColor: Color.fromARGB(
-                                                      255, 248, 246, 133)
-                                                  .withOpacity(0.12),
-                                              text: 'workshop_description'.tr,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 250,
-                                            left: 20,
-                                            child: GroupWidget(
-                                              assetName: 'assets/group-22.svg',
-                                              backgroundColor: Color.fromARGB(
-                                                      255, 253, 154, 149)
-                                                  .withOpacity(0.05),
-                                              text: 'reading_literacy'.tr,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 240,
-                                            left: 230,
-                                            child: GroupWidget(
-                                              assetName:
-                                                  'assets/group-22-3.svg',
-                                              backgroundColor: Color.fromARGB(
-                                                      255, 220, 132, 191)
-                                                  .withOpacity(0.12),
-                                              text: 'art'.tr,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 315,
-                                            left: 288,
-                                            child: LegendWidget(
-                                              color: Color(0xFF3D9C68),
-                                              text: 'first_assessment'.tr,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 315,
-                                            left: 190,
-                                            child: LegendWidget(
-                                              color: Color(0xFFF15B67),
-                                              text: 'second_assessment'.tr,
-                                            ),
-                                          ),
+                                              child: Center(
+                                            child: Column(children: [
+                                              SizedBox(
+                                                height: 60,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceAround,
+                                                children: [
+                                                  Expanded(
+                                                    child: GroupWidget(
+                                                      assetName:
+                                                          'assets/group-22-4.svg',
+                                                      backgroundColor:
+                                                          Color.fromARGB(255,
+                                                                  246, 95, 92)
+                                                              .withOpacity(
+                                                                  0.05),
+                                                      text: 'mathematics'
+                                                          .tr, // Use 'mathematics'.tr if using localization
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+
+                                              SizedBox(
+                                                  height:
+                                                      8), // Space between rows
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  GroupWidget(
+                                                    assetName:
+                                                        'assets/group-22-2.svg',
+                                                    backgroundColor:
+                                                        Color.fromARGB(255, 248,
+                                                                246, 133)
+                                                            .withOpacity(0.12),
+                                                    text: 'workshop_description'
+                                                        .tr, // Use 'workshop_description'.tr if using localization
+                                                  ),
+                                                  GroupWidget(
+                                                    assetName:
+                                                        'assets/group-22-5.svg',
+                                                    backgroundColor:
+                                                        Color.fromARGB(255, 84,
+                                                                163, 197)
+                                                            .withOpacity(0.05),
+                                                    text: 'life_skills'
+                                                        .tr, // Use 'life_skills'.tr if using localization
+                                                  ),
+                                                ],
+                                              ),
+                                              // Row for bottom items
+                                              SizedBox(height: 20),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  GroupWidget(
+                                                    assetName:
+                                                        'assets/group-22-3.svg',
+                                                    backgroundColor:
+                                                        Color.fromARGB(255, 220,
+                                                                132, 191)
+                                                            .withOpacity(0.12),
+                                                    text: 'art'
+                                                        .tr, // Use 'art'.tr if using localization
+                                                  ),
+                                                  GroupWidget(
+                                                    assetName:
+                                                        'assets/group-22.svg',
+                                                    backgroundColor:
+                                                        Color.fromARGB(255, 253,
+                                                                154, 149)
+                                                            .withOpacity(0.05),
+                                                    text: 'reading_literacy'
+                                                        .tr, // Use 'reading_literacy'.tr if using localization
+                                                  ),
+                                                ],
+                                              ),
+
+                                              SizedBox(
+                                                  height:
+                                                      20), // Space between legend and previous rows
+
+                                              // Legend widgets
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  LegendWidget(
+                                                    color: Color(0xFF3D9C68),
+                                                    text: 'first_assessment'
+                                                        .tr, // Use 'first_assessment'.tr if using localization
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          20), // Space between legends
+                                                  LegendWidget(
+                                                    color: Color(0xFFF15B67),
+                                                    text: 'second_assessment'
+                                                        .tr, // Use 'second_assessment'.tr if using localization
+                                                  ),
+                                                ],
+                                              ),
+                                            ]),
+                                          )),
+
+                                          // Positioned(
+                                          //   top:
+                                          //       50, // Adjusted for screen height
+                                          //   left: MediaQuery.of(context)
+                                          //           .size
+                                          //           .width *
+                                          //       0.38, // Adjusted for screen width
+                                          //   child: GroupWidget(
+                                          //     assetName:
+                                          //         'assets/group-22-4.svg',
+                                          //     backgroundColor: Color.fromARGB(
+                                          //             255, 246, 95, 92)
+                                          //         .withOpacity(0.05),
+                                          //     text: 'mathematics'.tr,
+                                          //   ),
+                                          // ),
+
+                                          // // Positioned widget for 'life_skills'
+                                          // Positioned(
+                                          //   top: MediaQuery.of(context)
+                                          //           .size
+                                          //           .height *
+                                          //       0.2,
+                                          //   left: 10,
+                                          //   child: GroupWidget(
+                                          //     assetName:
+                                          //         'assets/group-22-5.svg',
+                                          //     backgroundColor: Color.fromARGB(
+                                          //             255, 84, 163, 197)
+                                          //         .withOpacity(0.05),
+                                          //     text: 'life_skills'.tr,
+                                          //   ),
+                                          // ),
+
+                                          // // Positioned widget for 'workshop_description'
+                                          // Positioned(
+                                          //   top: 150,
+                                          //   left: MediaQuery.of(context)
+                                          //           .size
+                                          //           .width -
+                                          //       100,
+                                          //   child: GroupWidget(
+                                          //     assetName:
+                                          //         'assets/group-22-2.svg',
+                                          //     backgroundColor: Color.fromARGB(
+                                          //             255, 248, 246, 133)
+                                          //         .withOpacity(0.12),
+                                          //     text: 'workshop_description'.tr,
+                                          //   ),
+                                          // ),
+
+                                          // // Positioned widget for 'reading_literacy'
+                                          // Positioned(
+                                          //   top: 230,
+                                          //   left: 10,
+                                          //   child: GroupWidget(
+                                          //     assetName: 'assets/group-22.svg',
+                                          //     backgroundColor: Color.fromARGB(
+                                          //             255, 253, 154, 149)
+                                          //         .withOpacity(0.05),
+                                          //     text: 'reading_literacy'.tr,
+                                          //   ),
+                                          // ),
+
+                                          // // Positioned widget for 'art'
+                                          // Positioned(
+                                          //   top: 230,
+                                          //   left: MediaQuery.of(context)
+                                          //           .size
+                                          //           .width -
+                                          //       100,
+                                          //   child: GroupWidget(
+                                          //     assetName:
+                                          //         'assets/group-22-3.svg',
+                                          //     backgroundColor: Color.fromARGB(
+                                          //             255, 220, 132, 191)
+                                          //         .withOpacity(0.12),
+                                          //     text: 'art'.tr,
+                                          //   ),
+                                          // ),
+
+                                          // // Positioned widget for Legend widgets
+                                          // Positioned(
+                                          //   top: 310,
+                                          //   left: MediaQuery.of(context)
+                                          //           .size
+                                          //           .width -
+                                          //       100,
+                                          //   child: LegendWidget(
+                                          //     color: Color(0xFF3D9C68),
+                                          //     text: 'first_assessment'.tr,
+                                          //   ),
+                                          // ),
+                                          // Positioned(
+                                          //   top: 310,
+                                          //   left: MediaQuery.of(context)
+                                          //           .size
+                                          //           .width -
+                                          //       200,
+                                          //   child: LegendWidget(
+                                          //     color: Color(0xFFF15B67),
+                                          //     text: 'second_assessment'.tr,
+                                          //   ),
+                                          // ),
                                           Center(
                                             child: Column(
                                               children: [
@@ -1233,7 +1490,7 @@ class ScheduleItem extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'IRANSansXFaNum',
                 fontWeight: FontWeight.w400,
-                fontSize: 10,
+                fontSize: 11,
                 color: Color(0xFF353842),
               ),
             ),
@@ -1243,7 +1500,7 @@ class ScheduleItem extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'IRANSansXFaNum',
               fontWeight: FontWeight.w400,
-              fontSize: 8,
+              fontSize: 11,
               color: Color(0xFF353842),
             ),
           ),
@@ -1263,7 +1520,7 @@ class ScheduleItem extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'IRANSansXFaNum',
                     fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                    fontSize: 7,
                     color: Colors.white,
                   ),
                 ),
